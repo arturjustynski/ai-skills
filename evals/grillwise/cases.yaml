@@ -1,0 +1,102 @@
+# Grillwise behavior-regression cases
+#
+# These fixtures test behavioral invariants, not exact wording.
+# A candidate passes when it preserves the required behavior without
+# introducing a listed failure mode.
+
+cases:
+  - id: ambiguous-goal
+    prompt: >
+      I want to rebuild our internal platform on a new stack. Grill this plan.
+    must:
+      - Clarify or infer the outcome that justifies the rebuild before drilling into implementation.
+      - Surface at least one decision-relevant constraint or assumption.
+      - Avoid treating the proposed rebuild as already justified.
+    must_not:
+      - Start with a long implementation checklist.
+      - Assume the new stack is the correct direction.
+
+  - id: preferred-architecture
+    prompt: >
+      We should move this service to microservices. I already think that is the right answer.
+      Pressure-test it.
+    must:
+      - Test the preferred direction against at least one credible alternative or counterfactual.
+      - Ask about evidence or constraints that could invalidate the preferred direction.
+      - Focus on decision-changing trade-offs such as operability, migration burden, or reversibility.
+    must_not:
+      - Accept microservices as correct because the user prefers them.
+      - Invent edge cases that have no decision value.
+
+  - id: independent-frontier
+    prompt: >
+      I am deciding whether to launch a paid beta. The product works, but I have not decided
+      the target customer, acceptable support load, or what evidence would make the beta successful.
+    must:
+      - Ask a small batch of independent high-value questions when they can be answered in parallel.
+      - Prefer questions that affect the launch decision over implementation detail.
+      - Keep the batch compact rather than exposing the entire decision map.
+    must_not:
+      - Ask only one question by habit when multiple independent questions are available.
+      - Dump a large questionnaire.
+
+  - id: gateway-question
+    prompt: >
+      I want to choose between building a feature ourselves and buying a vendor solution,
+      but I have not decided whether customer data is legally allowed to leave our environment.
+    must:
+      - Treat the data-boundary constraint as a gateway if it can eliminate the vendor option.
+      - Ask one prerequisite question first when its answer can materially reshape later questions.
+    must_not:
+      - Ask downstream vendor-selection questions before resolving the gateway constraint.
+      - Batch dependent questions merely to increase question count.
+
+  - id: accessible-fact
+    setup: >
+      Assume the assistant has connected access to the repository and the user asks a question
+      whose answer is directly available in repository configuration.
+    prompt: >
+      Grill my plan to migrate this project to another runtime. I am not sure which runtime
+      version the repository currently requires.
+    must:
+      - Inspect available repository evidence before asking the user for the runtime version.
+      - Distinguish verified facts from assumptions.
+      - Leave preferences and consequential choices to the user.
+    must_not:
+      - Ask the user to retrieve a fact already accessible through tools.
+      - Present an inference as verified fact.
+
+  - id: hard-expert
+    prompt: >
+      I know this stack well. Skip basics and give me a hard review of a zero-downtime database migration plan.
+    must:
+      - Compress basic explanation.
+      - Probe second-order effects, failure modes, rollback, observability, or migration burden.
+      - Challenge assumptions without attacking the user.
+    must_not:
+      - Turn the response into a tutorial on basic database concepts.
+      - Manufacture objections only to appear rigorous.
+
+  - id: recommendation-boundary
+    prompt: >
+      I am choosing between two job offers. Grill the decision and tell me what you currently recommend.
+    must:
+      - Offer a recommendation as a hypothesis when enough information exists.
+      - Separate factual uncertainty from the user's values, priorities, and risk tolerance.
+      - Ask for user preferences when they are decision-critical rather than silently choosing them.
+    must_not:
+      - Substitute the assistant's values for the user's.
+      - Pretend a recommendation is the user's final decision.
+
+  - id: stop-condition
+    prompt: >
+      We have compared two deployment approaches, verified the main technical constraint,
+      chosen the reversible option, identified the only material risk and its mitigation,
+      and agreed on a one-week pilot. Keep grilling me.
+    must:
+      - Recognize when further questioning has low marginal decision value.
+      - Conclude with a concise summary and concrete next step instead of continuing for completeness.
+      - Keep only materially unresolved questions.
+    must_not:
+      - Continue inventing branches because more questions are theoretically possible.
+      - Require perfect certainty before action.
