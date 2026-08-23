@@ -40,7 +40,8 @@ ai-skills/
 │       ├── README.md
 │       ├── cases.yaml
 │       └── results/
-│           └── 2026-08-24-hardening-dry-run.md
+│           ├── 2026-08-24-hardening-dry-run.md
+│           └── 2026-08-24-simplification-dry-run.md
 └── skills/
     ├── grillwise/
     │   └── SKILL.md
