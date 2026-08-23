@@ -9,7 +9,7 @@ These skills are designed as focused workflows rather than one-off prompts. They
 | Skill | What it does |
 | --- | --- |
 | **[Grillwise](skills/grillwise/)** | Stress-tests decisions, plans, architectures, proposals, and projects through an adaptive interview that exposes assumptions, risks, trade-offs, validation needs, and reversible next steps. |
-| **[Routewise](skills/routewise/)** | Routes software-engineering work to the least expensive model-and-reasoning strategy that can complete the task correctly, escalating capability only when evidence shows it is needed. |
+| **[Routewise](skills/routewise/)** | Routes software-engineering work to the least expensive sufficient model-and-reasoning strategy for each stage, escalating capability only when evidence shows it is needed. |
 
 ## Installation
 
@@ -38,7 +38,9 @@ ai-skills/
 │   │   └── cases.yaml
 │   └── routewise/
 │       ├── README.md
-│       └── cases.yaml
+│       ├── cases.yaml
+│       └── results/
+│           └── 2026-08-24-hardening-dry-run.md
 └── skills/
     ├── grillwise/
     │   └── SKILL.md

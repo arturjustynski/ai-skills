@@ -4,11 +4,12 @@ Use this reference only when Routewise needs to translate abstract capability/re
 
 ## General adapter rules
 
-1. Prefer runtime introspection over stale assumptions when model availability or allowed reasoning levels can be inspected reliably.
-2. Respect organization allowlists, managed settings, provider substitutions, permissions, and user ceilings.
-3. Never claim a worker used a requested model if the runtime substituted another model; use the actual model when observable.
+1. Prefer runtime introspection over stale assumptions when model availability, allowed reasoning levels, effective model substitutions, or observable resource signals can be inspected reliably.
+2. Respect organization allowlists, provider/data boundaries, managed settings, permissions, user ceilings, and runtime credit/budget controls.
+3. Never claim a worker used a requested model or reasoning level if the runtime substituted something else; use the actual effective configuration when observable.
 4. If exact model or reasoning control is unavailable, fall back to advisory mode for that dimension rather than pretending it is controllable.
 5. Context-isolated workers are optional. They are especially useful for reconnaissance or adversarial review, but must never require manual user context transfer.
+6. Capability approval does not authorize a provider change, broader data exposure, or additional tool permissions.
 
 ## Codex / GPT-5.6
 
@@ -18,23 +19,35 @@ Default capability map when GPT-5.6 family models are available:
 - intermediate -> `gpt-5.6-terra`
 - strongest -> `gpt-5.6-sol`
 
-GPT-5.6 exposes configurable reasoning in the API, but a particular Codex surface may expose only a subset. Always use the real level supported by that surface.
+Treat reasoning/thinking level as a separate runtime-observed axis. A particular Codex surface may expose only a subset of levels, and labels can differ between surfaces.
 
-Current Codex multi-agent configuration supports a default spawned-agent model and reasoning effort, with explicit spawn settings taking precedence. Multi-agent collaboration may expose spawn/send/resume/wait/close primitives. When those primitives are available, keep the primary thread as controller and spawn bounded workers with the selected model/reasoning configuration.
+When the current surface exposes labels such as `low`, `medium`, `high`, `extra high`, `max`, or an additional `ultra` level on selected models, preserve those exact runtime labels in user-facing recommendations. Do not assume any level exists unless the active runtime or UI confirms it.
+
+A reasoning increase inside an already approved model tier does **not** require a new capability approval. It may still consume materially more credits or latency, so Routewise should choose the smallest useful increase rather than mechanically walking every level.
+
+If the runtime exposes actual credit usage or remaining allocation, use it as resource evidence. Do not reverse-engineer or invent hidden credit multipliers. An available allocation is a ceiling/resource budget, not a quality target to spend down.
+
+Current Codex multi-agent configuration may support a default spawned-agent model and reasoning effort, with explicit spawn settings taking precedence. Multi-agent collaboration may expose spawn/send/resume/wait/close primitives. When those primitives are available, keep the primary thread as controller and spawn bounded workers with the selected model/reasoning configuration.
 
 Do not bypass Routewise approval gates merely because Codex can technically spawn a stronger model.
 
-### Codex examples
+### Codex routing pattern
 
-A difficult planning task with no capability evidence beyond reasoning depth:
+Start routine orchestration cheaply:
 
 ```text
 controller: gpt-5.6-luna / medium
-planning worker: gpt-5.6-luna / highest useful supported reasoning
-implementation: gpt-5.6-luna / medium
 ```
 
-A confirmed capability gap in a bounded architectural decision:
+For a reasoning gap, stay on the approved capability tier and choose one materially stronger useful thinking level supported by that model, for example:
+
+```text
+planning worker: gpt-5.6-luna / extra high or max (when supported)
+```
+
+Do not automatically try `high -> extra high -> max` as a ladder. The point is to test whether additional reasoning resolves the bottleneck without buying more base capability.
+
+For a confirmed capability gap in a bounded architectural decision:
 
 ```text
 controller: gpt-5.6-luna / medium
@@ -43,7 +56,9 @@ Terra scope: resolve the load-bearing architectural decision only
 remaining implementation: gpt-5.6-luna / medium when sufficient
 ```
 
-If Terra later exposes a separate capability gap requiring Sol, request a new Sol approval.
+If Terra is already approved and the runtime offers a higher reasoning setting such as `max` or `ultra` on Terra, increasing Terra's thinking level remains a reasoning-axis decision; it is not Sol approval. Use it only when deeper processing of known information is the bottleneck and the added resource cost is justified.
+
+If Terra later exposes a separate capability gap requiring Sol, request a new Sol approval. The same rule applies inside Sol: higher thinking levels do not justify keeping Sol for routine stages after the load-bearing problem is resolved.
 
 ## Claude Code
 
@@ -76,10 +91,11 @@ routine implementation: economical subagent
 
 ## Unknown or future runtimes
 
-When model names or ordering change:
+When model names, ordering, reasoning controls, or resource accounting change:
 
 1. identify the cheapest practical coding model, a materially stronger middle tier, and the strongest available tier;
 2. identify supported reasoning/effort controls separately;
-3. preserve the Routewise approval sequence across capability tiers;
-4. do not infer exact price ratios unless reliable current rates are available;
-5. keep the routing core unchanged.
+3. inspect organization/provider/data boundaries before selecting an execution path;
+4. use observable credits/usage when available instead of invented cost ratios;
+5. preserve the Routewise approval sequence across capability tiers;
+6. keep the routing core unchanged.

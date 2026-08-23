@@ -6,8 +6,8 @@ They are behavioral fixtures, not golden-response tests. A model may produce dif
 
 ## Status
 
-- `baseline` — behavior already required by the current Routewise skill and expected to remain stable.
-- `target` — a known hardening requirement that is intentionally documented before the policy change lands. Target cases should be promoted to `baseline` when the corresponding policy is implemented.
+- `baseline` — behavior required by the current Routewise skill and expected to remain stable.
+- `target` — a known hardening requirement intentionally documented before the policy change lands. Promote it to `baseline` when the corresponding policy is implemented and the controlled regression check passes.
 
 ## Current method
 
@@ -20,6 +20,8 @@ For an instruction-only change:
 5. Reject or revise the candidate if a baseline invariant regresses.
 6. For `target` cases, record whether the planned hardening change now satisfies the fixture, then promote it to `baseline`.
 
+Controlled dry-run reports are stored under [`results/`](results/). They record the source revision, method, per-case result, and limitations.
+
 The suite is intentionally lightweight. It is suitable for controlled regression and design work, not for claiming statistically independent benchmark results.
 
-A future evaluation harness can execute the same cases repeatedly against real runtimes and record model tier, reasoning effort, worker count, usage, latency, escalation decisions, and task outcomes.
+A future evaluation harness can execute the same cases repeatedly against real runtimes and record model tier, reasoning effort, worker count, usage, credits, latency, escalation decisions, and task outcomes.
