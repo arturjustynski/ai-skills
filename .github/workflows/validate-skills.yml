@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - "skills/**"
+      - "evals/**"
       - ".github/workflows/validate-skills.yml"
   pull_request:
     paths:
       - "skills/**"
+      - "evals/**"
       - ".github/workflows/validate-skills.yml"
 
 permissions:
@@ -26,7 +28,7 @@ jobs:
       - name: Install validator dependency
         run: python -m pip install --disable-pip-version-check PyYAML==6.0.2
 
-      - name: Validate skill structure
+      - name: Validate skills and regression fixtures
         shell: python
         run: |
           from pathlib import Path
@@ -34,13 +36,14 @@ jobs:
           import sys
           import yaml
 
-          root = Path("skills")
+          skills_root = Path("skills")
+          evals_root = Path("evals")
           errors = []
 
-          if not root.is_dir():
+          if not skills_root.is_dir():
               errors.append("Missing skills/ directory")
           else:
-              skill_dirs = sorted(path for path in root.iterdir() if path.is_dir())
+              skill_dirs = sorted(path for path in skills_root.iterdir() if path.is_dir())
               if not skill_dirs:
                   errors.append("No skill directories found under skills/")
 
@@ -64,7 +67,10 @@ jobs:
                       continue
 
                   try:
-                      closing = next(i for i, line in enumerate(lines[1:], start=1) if line.strip() == "---")
+                      closing = next(
+                          i for i, line in enumerate(lines[1:], start=1)
+                          if line.strip() == "---"
+                      )
                   except StopIteration:
                       errors.append(f"{skill_file}: YAML frontmatter has no closing ---")
                       continue
@@ -100,9 +106,89 @@ jobs:
                   elif len(description) > 1024:
                       errors.append(f"{skill_file}: description exceeds 1024 characters")
 
+                  # Local Markdown resources must stay inside the skill directory
+                  # and resolve to real files.
+                  for raw_target in re.findall(r"\[[^\]]+\]\(([^)]+)\)", text):
+                      target = raw_target.strip().split("#", 1)[0]
+                      if not target or "://" in target or target.startswith(("mailto:", "/")):
+                          continue
+
+                      local_target = (skill_dir / target).resolve()
+                      try:
+                          local_target.relative_to(skill_dir.resolve())
+                      except ValueError:
+                          errors.append(
+                              f"{skill_file}: reference escapes skill directory: {raw_target}"
+                          )
+                          continue
+
+                      if not local_target.exists():
+                          errors.append(
+                              f"{skill_file}: missing referenced resource: {raw_target}"
+                          )
+
+          if evals_root.exists():
+              eval_dirs = sorted(path for path in evals_root.iterdir() if path.is_dir())
+              for eval_dir in eval_dirs:
+                  cases_file = eval_dir / "cases.yaml"
+                  if not cases_file.is_file():
+                      errors.append(f"{eval_dir}: missing cases.yaml")
+                      continue
+
+                  try:
+                      suite = yaml.safe_load(cases_file.read_text(encoding="utf-8")) or {}
+                  except yaml.YAMLError as exc:
+                      errors.append(f"{cases_file}: invalid YAML: {exc}")
+                      continue
+
+                  cases = suite.get("cases") if isinstance(suite, dict) else None
+                  if not isinstance(cases, list) or not cases:
+                      errors.append(f"{cases_file}: cases must be a non-empty list")
+                      continue
+
+                  seen_ids = set()
+                  for index, case in enumerate(cases, start=1):
+                      prefix = f"{cases_file}: case #{index}"
+                      if not isinstance(case, dict):
+                          errors.append(f"{prefix} must be a mapping")
+                          continue
+
+                      case_id = case.get("id")
+                      if not isinstance(case_id, str) or not re.fullmatch(
+                          r"[a-z0-9]+(?:-[a-z0-9]+)*", case_id
+                      ):
+                          errors.append(f"{prefix} has invalid id {case_id!r}")
+                      elif case_id in seen_ids:
+                          errors.append(f"{cases_file}: duplicate case id {case_id!r}")
+                      else:
+                          seen_ids.add(case_id)
+
+                      status = case.get("status", "baseline")
+                      if status not in {"baseline", "target"}:
+                          errors.append(
+                              f"{prefix} has invalid status {status!r}; "
+                              "expected 'baseline' or 'target'"
+                          )
+
+                      prompt = case.get("prompt")
+                      if not isinstance(prompt, str) or not prompt.strip():
+                          errors.append(f"{prefix} requires a non-empty prompt")
+
+                      for field in ("must", "must_not"):
+                          values = case.get(field)
+                          if not isinstance(values, list) or not values:
+                              errors.append(f"{prefix} requires a non-empty {field} list")
+                          elif not all(
+                              isinstance(value, str) and value.strip()
+                              for value in values
+                          ):
+                              errors.append(
+                                  f"{prefix} {field} entries must be non-empty strings"
+                              )
+
           if errors:
               for error in errors:
                   print(f"::error::{error}")
               sys.exit(1)
 
-          print("All skills passed structural validation.")
+          print("All skills and regression fixtures passed structural validation.")

@@ -33,7 +33,10 @@ ai-skills/
 │   └── workflows/
 │       └── validate-skills.yml
 ├── evals/
-│   └── grillwise/
+│   ├── grillwise/
+│   │   ├── README.md
+│   │   └── cases.yaml
+│   └── routewise/
 │       ├── README.md
 │       └── cases.yaml
 └── skills/
@@ -55,7 +58,7 @@ ai-skills/
 
 ## Validation
 
-Every push and pull request runs a lightweight structural check for each skill: required `SKILL.md`, valid YAML frontmatter, naming constraints, directory/name consistency, and description limits. Long `SKILL.md` files also receive a warning so they can be reviewed for progressive disclosure opportunities.
+Every push and pull request that changes skills, evals, or the validation workflow runs lightweight checks for required `SKILL.md` files, valid YAML frontmatter, naming constraints, directory/name consistency, description limits, local skill references, and regression-fixture structure. Long `SKILL.md` files also receive a warning so they can be reviewed for progressive disclosure opportunities.
 
 Behavioral regression fixtures for instruction refactors live under [`evals/`](evals/). They protect behavior rather than exact response wording and are intentionally lightweight until an automated multi-run evaluation harness becomes worthwhile.
 
