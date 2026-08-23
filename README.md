@@ -1,2 +1,63 @@
-# ai-skills
-A growing collection of practical, reusable AI skills by Artur Justyński
+# AI Skills
+
+A growing collection of practical, reusable AI skills by **Artur Justyński**.
+
+These skills are designed as focused workflows rather than one-off prompts. They follow the open Agent Skills format and aim to stay portable across compatible AI clients wherever the underlying runtime allows it.
+
+## Skills
+
+| Skill | What it does |
+| --- | --- |
+| **[Grillwise](skills/grillwise/)** | Stress-tests decisions, plans, architectures, proposals, and projects through an adaptive interview that exposes assumptions, risks, trade-offs, validation needs, and reversible next steps. |
+| **[Routewise](skills/routewise/)** | Routes software-engineering work to the least expensive model-and-reasoning strategy that can complete the task correctly, escalating capability only when evidence shows it is needed. |
+
+## Installation
+
+For now, installation is intentionally simple and manual:
+
+1. Clone or download this repository.
+2. Choose a directory under [`skills/`](skills/).
+3. Install or copy that complete skill directory into a skills location supported by your AI client.
+
+The skill directory should be kept intact, including any `references/`, `scripts/`, or other bundled resources it contains.
+
+Client-specific locations and installation flows vary. A provider-aware installer may be added later; until then, this repository avoids hard-coding paths that are not portable across clients.
+
+## Repository structure
+
+```text
+ai-skills/
+├── README.md
+├── LICENSE
+├── .github/
+│   └── workflows/
+│       └── validate-skills.yml
+└── skills/
+    ├── grillwise/
+    │   └── SKILL.md
+    └── routewise/
+        ├── SKILL.md
+        └── references/
+            ├── runtime-adapters.md
+            └── verification.md
+```
+
+## Design principles
+
+- **Useful before impressive.** A skill should solve a real workflow problem, not exist to look sophisticated.
+- **Progressive disclosure.** Keep the core behavior in `SKILL.md`; move optional detail into supporting resources only when it genuinely helps.
+- **Evidence over ceremony.** Validation, escalation, and complexity should be justified by the task rather than added by default.
+- **Portable where practical.** Keep skill logic vendor-neutral unless runtime-specific behavior is actually required.
+
+## Validation
+
+Every push and pull request runs a lightweight structural check for each skill: required `SKILL.md`, valid YAML frontmatter, naming constraints, directory/name consistency, and description limits. Long `SKILL.md` files also receive a warning so they can be reviewed for progressive disclosure opportunities.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+## Author
+
+**Artur Justyński**  
+GitHub: [@arturjustynski](https://github.com/arturjustynski)

@@ -1,0 +1,108 @@
+name: Validate skills
+
+on:
+  push:
+    paths:
+      - "skills/**"
+      - ".github/workflows/validate-skills.yml"
+  pull_request:
+    paths:
+      - "skills/**"
+      - ".github/workflows/validate-skills.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install validator dependency
+        run: python -m pip install --disable-pip-version-check PyYAML==6.0.2
+
+      - name: Validate skill structure
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          import sys
+          import yaml
+
+          root = Path("skills")
+          errors = []
+
+          if not root.is_dir():
+              errors.append("Missing skills/ directory")
+          else:
+              skill_dirs = sorted(path for path in root.iterdir() if path.is_dir())
+              if not skill_dirs:
+                  errors.append("No skill directories found under skills/")
+
+              for skill_dir in skill_dirs:
+                  skill_file = skill_dir / "SKILL.md"
+                  if not skill_file.is_file():
+                      errors.append(f"{skill_dir}: missing SKILL.md")
+                      continue
+
+                  text = skill_file.read_text(encoding="utf-8")
+                  lines = text.splitlines()
+
+                  if len(lines) > 500:
+                      print(
+                          f"::warning file={skill_file}::SKILL.md has {len(lines)} lines; "
+                          "consider progressive disclosure."
+                      )
+
+                  if not lines or lines[0].strip() != "---":
+                      errors.append(f"{skill_file}: YAML frontmatter must start with ---")
+                      continue
+
+                  try:
+                      closing = next(i for i, line in enumerate(lines[1:], start=1) if line.strip() == "---")
+                  except StopIteration:
+                      errors.append(f"{skill_file}: YAML frontmatter has no closing ---")
+                      continue
+
+                  try:
+                      metadata = yaml.safe_load("\n".join(lines[1:closing])) or {}
+                  except yaml.YAMLError as exc:
+                      errors.append(f"{skill_file}: invalid YAML frontmatter: {exc}")
+                      continue
+
+                  if not isinstance(metadata, dict):
+                      errors.append(f"{skill_file}: frontmatter must be a YAML mapping")
+                      continue
+
+                  name = metadata.get("name")
+                  description = metadata.get("description")
+
+                  if not isinstance(name, str) or not name:
+                      errors.append(f"{skill_file}: name is required")
+                  else:
+                      if len(name) > 64:
+                          errors.append(f"{skill_file}: name exceeds 64 characters")
+                      if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name):
+                          errors.append(f"{skill_file}: invalid name {name!r}")
+                      if name != skill_dir.name:
+                          errors.append(
+                              f"{skill_file}: frontmatter name {name!r} does not match "
+                              f"directory {skill_dir.name!r}"
+                          )
+
+                  if not isinstance(description, str) or not description.strip():
+                      errors.append(f"{skill_file}: description is required")
+                  elif len(description) > 1024:
+                      errors.append(f"{skill_file}: description exceeds 1024 characters")
+
+          if errors:
+              for error in errors:
+                  print(f"::error::{error}")
+              sys.exit(1)
+
+          print("All skills passed structural validation.")
