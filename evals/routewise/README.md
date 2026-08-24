@@ -1,27 +1,13 @@
-# Routewise regression fixtures
+# Routewise entry-point regression fixtures
 
-These cases protect Routewise's routing-policy contract while the skill evolves.
+These cases protect the post-split contract of the `routewise` entry point.
 
-They are behavioral fixtures, not golden-response tests. A model may produce different wording while still preserving the required routing decisions.
+`routewise` is intentionally recommendation-only. It selects the next Routewise workflow and a provisional model/reasoning route, but it does not create the implementation plan or execute the implementation.
 
-## Status
+The historical dry-run reports in `results/` describe the earlier monolithic Routewise design and are retained as project history. New behavior is evaluated against the split workflow suites:
 
-- `baseline` — behavior required by the current Routewise skill and expected to remain stable.
-- `target` — a known hardening requirement intentionally documented before the policy change lands. Promote it to `baseline` when the corresponding policy is implemented and the controlled regression check passes.
+- `evals/routewise/` — recommendation-only entry point;
+- `evals/routewise-plan/` — execution-optimized planning;
+- `evals/routewise-implementation/` — ready-plan routing and optional execution.
 
-## Current method
-
-For an instruction-only change:
-
-1. Review or run the current skill against every `baseline` case.
-2. Check that every `must` behavior is present and every `must_not` behavior is avoided.
-3. Apply the candidate instruction.
-4. Repeat the same cases without changing the rubric.
-5. Reject or revise the candidate if a baseline invariant regresses.
-6. For `target` cases, record whether the planned hardening change now satisfies the fixture, then promote it to `baseline`.
-
-Controlled dry-run reports are stored under [`results/`](results/). They record the source revision, method, per-case result, and limitations.
-
-The suite is intentionally lightweight. It is suitable for controlled regression and design work, not for claiming statistically independent benchmark results.
-
-A future evaluation harness can execute the same cases repeatedly against real runtimes and record model tier, reasoning effort, worker count, usage, credits, latency, escalation decisions, and task outcomes.
+The fixtures are behavioral, not golden-response tests. They protect decisions and guardrails rather than exact wording.

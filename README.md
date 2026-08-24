@@ -9,7 +9,11 @@ These skills are designed as focused workflows rather than one-off prompts. They
 | Skill | What it does |
 | --- | --- |
 | **[Grillwise](skills/grillwise/)** | Stress-tests decisions, plans, architectures, proposals, and projects through an adaptive interview that exposes assumptions, risks, trade-offs, validation needs, and reversible next steps. |
-| **[Routewise](skills/routewise/)** | Routes software-engineering work to the least expensive sufficient model-and-reasoning strategy for each stage, escalating capability only when evidence shows it is needed. |
+| **[Routewise](skills/routewise/)** | Recommendation-only entry point that chooses the next Routewise workflow and a provisional model + reasoning route without planning or implementing the task. |
+| **[Routewise Plan](skills/routewise-plan/)** | Builds execution-optimized implementation plans that move load-bearing reasoning into planning so downstream stages can use the least expensive sufficient capability. |
+| **[Routewise Implementation](skills/routewise-implementation/)** | Routes ready plans to the least expensive sufficient `(model, reasoning)` pair, validates execution, and recommends a bounded re-plan when plan quality is what makes implementation expensive. |
+
+The Routewise skills are intentionally separated by phase. `routewise` is a read-only recommendation gate, `routewise-plan` shapes work for economical execution, and `routewise-implementation` routes or executes work that is already sufficiently specified.
 
 ## Installation
 
@@ -20,6 +24,8 @@ For now, installation is intentionally simple and manual:
 3. Install or copy that complete skill directory into a skills location supported by your AI client.
 
 The skill directory should be kept intact, including any `references/`, `scripts/`, or other bundled resources it contains.
+
+For the complete Routewise workflow, install all three Routewise directories: `routewise`, `routewise-plan`, and `routewise-implementation`.
 
 Client-specific locations and installation flows vary. A provider-aware installer may be added later; until then, this repository avoids hard-coding paths that are not portable across clients.
 
@@ -36,20 +42,27 @@ ai-skills/
 │   ├── grillwise/
 │   │   ├── README.md
 │   │   └── cases.yaml
-│   └── routewise/
+│   ├── routewise/
+│   │   ├── README.md
+│   │   ├── cases.yaml
+│   │   └── results/
+│   │       ├── 2026-08-24-hardening-dry-run.md
+│   │       └── 2026-08-24-simplification-dry-run.md
+│   ├── routewise-plan/
+│   │   ├── README.md
+│   │   └── cases.yaml
+│   └── routewise-implementation/
 │       ├── README.md
-│       ├── cases.yaml
-│       └── results/
-│           ├── 2026-08-24-hardening-dry-run.md
-│           └── 2026-08-24-simplification-dry-run.md
+│       └── cases.yaml
 └── skills/
     ├── grillwise/
     │   └── SKILL.md
-    └── routewise/
-        ├── SKILL.md
-        └── references/
-            ├── runtime-adapters.md
-            └── verification.md
+    ├── routewise/
+    │   └── SKILL.md
+    ├── routewise-plan/
+    │   └── SKILL.md
+    └── routewise-implementation/
+        └── SKILL.md
 ```
 
 ## Design principles

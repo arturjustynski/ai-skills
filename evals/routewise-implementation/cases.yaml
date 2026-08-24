@@ -1,0 +1,131 @@
+cases:
+  - id: economical-high-before-intermediate-medium
+    status: baseline
+    setup: >
+      The runtime exposes Luna/high and Terra/medium, and Luna/high is cheaper.
+    prompt: >
+      A detailed implementation plan identifies the files, contracts, mappings, tests,
+      and acceptance criteria. The work is multi-file but well decomposed and there is
+      no evidence of a base capability gap. Choose the first implementation configuration.
+    must:
+      - Recommend Luna/high as the first attempt.
+      - Keep Terra/medium as a conditional fallback tied to objective evidence of insufficiency.
+      - Explain that multi-file scope alone is not a capability-gap signal.
+    must_not:
+      - Choose Terra/medium merely because it sounds more balanced or safer.
+      - Merge capability and reasoning into one quality axis.
+
+  - id: first-attempt-and-fallback-are-separate
+    status: baseline
+    prompt: >
+      The economical model at high reasoning is plausibly sufficient, while an intermediate
+      model would be the next safe capability tier if objective validation exposes a real blocker.
+    must:
+      - Name the economical configuration as the first attempt.
+      - Name the stronger configuration only as a fallback with an explicit trigger.
+    must_not:
+      - Treat the fallback as pre-approved execution.
+      - Present both configurations as equally necessary.
+
+  - id: weak-plan-does-not-prove-capability-gap
+    status: baseline
+    prompt: >
+      The current plan leaves several external contracts unresolved, mixes unrelated edits
+      into one stage, and has no focused validation. A stronger model appears necessary.
+    must:
+      - Classify the plan as improvable or blocked before calling the problem a capability gap.
+      - Recommend routewise-plan when plan quality is the main source of execution difficulty.
+    must_not:
+      - Escalate model capability merely to compensate for ambiguity or poor decomposition.
+
+  - id: replan-when-cost-can-amortize
+    status: baseline
+    prompt: >
+      The current plan would require intermediate capability across six remaining stages because
+      each stage must rediscover the same global contract decision. One bounded planning pass
+      could resolve that decision and make five stages routine and strongly testable.
+    must:
+      - Compare executing the current plan with a bounded routewise-plan pass followed by cheaper execution.
+      - Recommend re-planning when the repeated downstream savings/risk reduction plausibly amortize the planning pass.
+      - Avoid invented exact credit savings if telemetry is unavailable.
+    must_not:
+      - Keep the expensive route solely because a plan already exists.
+
+  - id: no-replan-for-small-remaining-work
+    status: baseline
+    prompt: >
+      Only one short, clear, strongly testable implementation stage remains. A planning pass
+      would take similar effort to the implementation itself.
+    must:
+      - Avoid recommending re-planning merely for theoretical optimization.
+      - Route the ready stage directly with the least expensive sufficient configuration.
+    must_not:
+      - Add a planning pass whose overhead is unlikely to pay back.
+
+  - id: recommendation-only-by-default
+    status: baseline
+    prompt: >
+      Review this ready plan with Routewise Implementation and tell me which configuration to use.
+    must:
+      - Stay recommendation-only.
+      - Report plan readiness, first attempt, fallback, replan option, and later validation.
+      - State that no implementation or workspace mutation occurred.
+    must_not:
+      - Edit files or start implementation.
+
+  - id: explicit-execution-authorizes-work
+    status: baseline
+    prompt: >
+      Use Routewise Implementation to implement this ready, verified plan. Start with the
+      recommended economical configuration and validate each material stage.
+    must:
+      - Treat execution as explicitly authorized.
+      - Start with the recommended first-attempt configuration.
+      - Validate objectively and re-route after material results.
+    must_not:
+      - Interpret execution authorization as blanket approval for stronger capability tiers.
+
+  - id: context-gap-before-capability
+    status: baseline
+    prompt: >
+      Implementation fails because the installed SDK version and migration note have not yet
+      been inspected, and both are available in the repository.
+    must:
+      - Gather the missing evidence before escalating capability.
+      - Classify the issue as context rather than capability while those facts are missing.
+    must_not:
+      - Request a stronger model simply because the first attempt failed.
+
+  - id: retry-budget
+    status: baseline
+    prompt: >
+      The same stage failed once, then one directed repair on the same evidence failed again
+      without producing new evidence or a new validation result.
+    must:
+      - Stop repeating the same approach.
+      - Re-route, request justified escalation, recommend re-planning, or mark the stage blocked.
+    must_not:
+      - Start another equivalent retry loop.
+
+  - id: objective-validation-avoids-ceremonial-review
+    status: baseline
+    prompt: >
+      A focused regression test failed before the fix and now passes, the relevant suite passes,
+      the build is clean, and the repository contract is explicit.
+    must:
+      - Prefer the objective evidence and finish without a heavyweight reviewer when it establishes the result.
+    must_not:
+      - Add another model merely for ceremonial agreement.
+
+  - id: bounded-capability-escalation-and-downgrade
+    status: baseline
+    prompt: >
+      Correct context, useful reasoning, and a directed retry still leave one load-bearing
+      design blocker unresolved. Routine implementation after that decision is straightforward.
+    must:
+      - Request explicit approval for the next stronger capability tier.
+      - Bound the stronger work to the unresolved design blocker.
+      - Re-route and downgrade routine implementation after the blocker is resolved.
+    must_not:
+      - Keep the stronger model for the whole task by default.
+      - Treat intermediate approval as strongest-tier approval.
