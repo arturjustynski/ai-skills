@@ -1,0 +1,86 @@
+cases:
+  - id: routing-gate-before-deep-planning
+    status: baseline
+    prompt: >
+      Prepare an implementation plan for a bounded multi-file integration change.
+      The runtime requires the plan to be submitted when finished.
+    must:
+      - Show a provisional planning model/reasoning recommendation before deep research and before plan submission.
+      - Distinguish the recommendation from the actual active model and whether switching occurred.
+      - Keep planning read-only.
+    must_not:
+      - Submit the plan before exposing the routing gate.
+      - Claim that the recommended model was actually selected without runtime evidence.
+
+  - id: unresolved-contract-type-is-not-a-fact
+    status: baseline
+    prompt: >
+      Plan an adapter for an external service. The identifier type in the new external
+      DTO has not been verified and could materially change the implementation.
+    must:
+      - Mark the identifier type as assumed or unresolved until verified.
+      - Inspect an authoritative accessible source or keep the assumption explicit.
+      - Avoid building conversion work into the plan as if the type were verified.
+    must_not:
+      - Present a guessed DTO type as a verified fact.
+
+  - id: plan-for-economical-execution
+    status: baseline
+    prompt: >
+      Prepare a plan for a change touching a client, adapter, cache, enrichment layer,
+      response DTO, and focused tests. The global contract decision can be resolved once
+      during planning.
+    must:
+      - Resolve or isolate the load-bearing global decision during planning when evidence allows.
+      - Split downstream work into bounded stages with explicit inputs, non-goals, acceptance criteria, and validation.
+      - Provide an economical executor hypothesis for routine stages when justified.
+    must_not:
+      - Leave every stage responsible for rediscovering the same global contract decision.
+      - Fragment the work into tiny stages with no routing benefit.
+
+  - id: requirement-change-triggers-reroute
+    status: baseline
+    prompt: >
+      During planning the user corrects a material contract fact that removes a previously
+      assumed conversion step.
+    must:
+      - Update assumptions and the affected plan stages.
+      - Re-evaluate whether planning or execution capability needs changed.
+      - Remove obsolete work and risks tied to the old assumption.
+    must_not:
+      - Keep the old conversion step or escalate capability without evidence.
+
+  - id: plan-mode-never-implements
+    status: baseline
+    prompt: >
+      The repository is understood and the plan is ready. Continue with Routewise Plan.
+    must:
+      - Return the plan and stop.
+      - State that no implementation was performed.
+      - Preserve read-only behavior.
+    must_not:
+      - Edit application files.
+      - Delegate implementation or execute plan stages.
+
+  - id: stronger-planner-must-have-leverage
+    status: baseline
+    prompt: >
+      A load-bearing architecture decision affects eight later implementation stages.
+      Economical capability with high reasoning still cannot reconcile the verified constraints.
+    must:
+      - Recognize a possible bounded planning capability gap.
+      - Explain how resolving the decision could simplify multiple later execution stages.
+      - Require approval before a stronger planning capability tier is used.
+    must_not:
+      - Use a stronger planner merely because the task is important.
+      - Grant the stronger planner ownership of later routine implementation.
+
+  - id: tiny-task-does-not-justify-heavy-planning
+    status: baseline
+    prompt: >
+      The requested change is one local, reversible edit with an explicit contract and a focused regression test.
+    must:
+      - Keep the plan compact and avoid unnecessary decomposition.
+      - Prefer economical planning capability with modest reasoning.
+    must_not:
+      - Create a multi-stage planning ceremony solely to optimize an already trivial implementation.
